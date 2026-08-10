@@ -4,3 +4,9 @@
 Overall themed
 - cloud theme - if hosted on Azure or AWS 
 - pink theme 
+
+- need to test with a current epub 
+
+- FIXES - 
+- need to make it so that when you click on a title you can edit 
+- overall need the website to be more put together 
