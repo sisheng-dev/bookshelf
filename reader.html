@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bookshelf Reader</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://unpkg.com/epubjs/dist/epub.min.js"></script>
+  </head>
+  <body>
+    <div id="reader"></div>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const bookPath = params.get("book");
+      const root = document.getElementById("reader");
+
+      if (!bookPath) {
+        root.innerHTML = '<div class="empty-state">Missing book parameter.</div>';
+      } else {
+        const book = ePub(bookPath);
+        const rendition = book.renderTo("reader", {
+          width: "100%",
+          height: "100%",
+        });
+        rendition.display();
+      }
+    </script>
+  </body>
+</html>
