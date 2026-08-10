@@ -1,0 +1,6 @@
+- Ideally want to have a bookshelf like feel almost Apple Books themed 
+- Need to have a better name 
+
+Overall themed
+- cloud theme - if hosted on Azure or AWS 
+- pink theme 
