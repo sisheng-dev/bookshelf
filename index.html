@@ -1,1 +1,711 @@
 <!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>my shelf</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FBF7F9;
+    --ink: #453645;
+    --ink-soft: #8B7FA3;
+    --pink: #D4A5C4;
+    --lavender: #B8A9D9;
+    --blush: #F3DFE8;
+    --blush-deep: #EACBDB;
+    --card-shadow: 0 10px 25px -12px rgba(139, 127, 163, 0.35);
+    --card-shadow-hover: 0 18px 34px -14px rgba(212, 165, 196, 0.5);
+  }
+
+- { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+margin: 0;
+background: var(–bg);
+background-image:
+radial-gradient(circle at 8% 12%, rgba(184, 169, 217, 0.10) 0%, transparent 45%),
+radial-gradient(circle at 92% 85%, rgba(212, 165, 196, 0.12) 0%, transparent 45%);
+color: var(–ink);
+font-family: ‘Quicksand’, sans-serif;
+min-height: 100vh;
+}
+
+/* ––––– Header ––––– */
+header {
+padding: 56px 6vw 28px;
+display: flex;
+flex-direction: column;
+gap: 22px;
+}
+
+.brand-row {
+display: flex;
+align-items: baseline;
+justify-content: space-between;
+flex-wrap: wrap;
+gap: 16px;
+}
+
+.brand {
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.brand-mark {
+width: 34px;
+height: 34px;
+flex-shrink: 0;
+}
+
+.brand h1 {
+font-family: ‘Fraunces’, serif;
+font-weight: 600;
+font-size: clamp(28px, 4vw, 38px);
+margin: 0;
+letter-spacing: -0.01em;
+}
+
+.brand h1 em {
+font-style: italic;
+font-weight: 500;
+color: var(–pink);
+}
+
+.tagline {
+font-size: 13px;
+color: var(–ink-soft);
+letter-spacing: 0.04em;
+margin: 2px 0 0 44px;
+}
+
+.stats {
+font-size: 13px;
+color: var(–ink-soft);
+display: flex;
+gap: 18px;
+}
+
+.stats strong {
+color: var(–ink);
+font-weight: 700;
+}
+
+/* ––––– Search + Filters ––––– */
+.controls {
+display: flex;
+gap: 12px;
+flex-wrap: wrap;
+align-items: center;
+}
+
+.search-wrap {
+position: relative;
+flex: 1 1 260px;
+max-width: 420px;
+}
+
+.search-wrap svg {
+position: absolute;
+left: 16px;
+top: 50%;
+transform: translateY(-50%);
+opacity: 0.5;
+}
+
+#search {
+width: 100%;
+padding: 12px 16px 12px 42px;
+border-radius: 999px;
+border: 1.5px solid var(–blush-deep);
+background: #fff;
+font-family: ‘Quicksand’, sans-serif;
+font-size: 14px;
+color: var(–ink);
+outline: none;
+transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#search::placeholder { color: #C6B9CC; }
+
+#search:focus {
+border-color: var(–pink);
+box-shadow: 0 0 0 4px rgba(212, 165, 196, 0.18);
+}
+
+.shelf-tabs {
+display: flex;
+gap: 8px;
+flex-wrap: wrap;
+}
+
+.shelf-tab {
+border: 1.5px solid var(–blush-deep);
+background: #fff;
+color: var(–ink-soft);
+font-family: ‘Quicksand’, sans-serif;
+font-weight: 600;
+font-size: 13px;
+padding: 9px 18px;
+border-radius: 999px;
+cursor: pointer;
+transition: all 0.18s ease;
+}
+
+.shelf-tab:hover {
+border-color: var(–pink);
+color: var(–ink);
+}
+
+.shelf-tab.active {
+background: var(–ink);
+border-color: var(–ink);
+color: #fff;
+}
+
+/* ––––– Shelf grid ––––– */
+main {
+padding: 12px 6vw 100px;
+}
+
+.shelf-section {
+margin-bottom: 52px;
+}
+
+.shelf-label {
+font-family: ‘Fraunces’, serif;
+font-style: italic;
+font-size: 15px;
+color: var(–ink-soft);
+margin: 0 0 18px 4px;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.shelf-label::after {
+content: ‘’;
+flex: 1;
+height: 1px;
+background: linear-gradient(to right, var(–blush-deep), transparent);
+}
+
+.grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+gap: 30px 22px;
+}
+
+.book {
+cursor: pointer;
+display: flex;
+flex-direction: column;
+gap: 10px;
+position: relative;
+}
+
+.book:focus-visible .cover {
+outline: 3px solid var(–pink);
+outline-offset: 3px;
+}
+
+.cover {
+aspect-ratio: 2 / 3;
+border-radius: 6px 9px 9px 6px;
+box-shadow: var(–card-shadow);
+display: flex;
+align-items: center;
+justify-content: center;
+text-align: center;
+padding: 18px;
+position: relative;
+transition: transform 0.28s cubic-bezier(.2,.8,.2,1), box-shadow 0.28s;
+overflow: hidden;
+}
+
+.cover::before {
+/* spine highlight */
+content: ‘’;
+position: absolute;
+left: 0; top: 0; bottom: 0;
+width: 10px;
+background: linear-gradient(to right, rgba(255,255,255,0.35), transparent);
+}
+
+.cover::after {
+/* page edge on the right */
+content: ‘’;
+position: absolute;
+right: 0; top: 3px; bottom: 3px;
+width: 4px;
+background: repeating-linear-gradient(
+to bottom,
+rgba(255,255,255,0.55) 0px,
+rgba(255,255,255,0.55) 2px,
+rgba(0,0,0,0.04) 2px,
+rgba(0,0,0,0.04) 4px
+);
+border-radius: 0 3px 3px 0;
+}
+
+.cover-title {
+font-family: ‘Fraunces’, serif;
+font-weight: 600;
+font-size: 15px;
+line-height: 1.25;
+color: rgba(0,0,0,0.72);
+}
+
+.book:hover .cover, .book:focus-visible .cover {
+transform: translateY(-6px) rotate(-1deg);
+box-shadow: var(–card-shadow-hover);
+}
+
+.progress-ring {
+position: absolute;
+top: 10px;
+right: 10px;
+width: 22px;
+height: 22px;
+}
+
+.meta {
+padding: 0 2px;
+}
+
+.meta .title {
+font-size: 13.5px;
+font-weight: 700;
+line-height: 1.3;
+margin: 0;
+}
+
+.meta .author {
+font-size: 12px;
+color: var(–ink-soft);
+margin: 3px 0 0;
+}
+
+.progress-bar {
+margin-top: 6px;
+height: 4px;
+border-radius: 2px;
+background: var(–blush);
+overflow: hidden;
+}
+
+.progress-bar > span {
+display: block;
+height: 100%;
+background: linear-gradient(to right, var(–lavender), var(–pink));
+border-radius: 2px;
+}
+
+.empty-state {
+text-align: center;
+padding: 60px 20px;
+color: var(–ink-soft);
+font-family: ‘Fraunces’, serif;
+font-style: italic;
+font-size: 16px;
+}
+
+/* ––––– Upload tile ––––– */
+.add-book .cover {
+background: #fff;
+border: 1.5px dashed var(–blush-deep);
+box-shadow: none;
+color: var(–ink-soft);
+flex-direction: column;
+gap: 8px;
+}
+
+.add-book .cover::before, .add-book .cover::after { display: none; }
+.add-book:hover .cover {
+border-color: var(–pink);
+color: var(–pink);
+transform: translateY(-4px);
+}
+
+.add-book .meta .title { color: var(–ink-soft); font-weight: 600; }
+
+/* ––––– Reader modal ––––– */
+.modal-backdrop {
+position: fixed;
+inset: 0;
+background: rgba(69, 54, 69, 0.35);
+backdrop-filter: blur(3px);
+display: flex;
+align-items: center;
+justify-content: center;
+padding: 24px;
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.25s ease;
+z-index: 50;
+}
+
+.modal-backdrop.open {
+opacity: 1;
+pointer-events: auto;
+}
+
+.modal {
+background: #fff;
+border-radius: 22px;
+max-width: 440px;
+width: 100%;
+padding: 34px 30px 28px;
+position: relative;
+box-shadow: 0 30px 60px -20px rgba(69, 54, 69, 0.35);
+transform: translateY(14px) scale(0.98);
+transition: transform 0.25s ease;
+}
+
+.modal-backdrop.open .modal {
+transform: translateY(0) scale(1);
+}
+
+.modal-close {
+position: absolute;
+top: 18px;
+right: 18px;
+background: var(–blush);
+border: none;
+width: 30px;
+height: 30px;
+border-radius: 50%;
+cursor: pointer;
+color: var(–ink);
+font-size: 15px;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.modal-close:hover { background: var(–pink); color: #fff; }
+
+.modal-cover {
+width: 100px;
+aspect-ratio: 2/3;
+border-radius: 6px 9px 9px 6px;
+box-shadow: var(–card-shadow);
+margin-bottom: 18px;
+display: flex;
+align-items: center;
+justify-content: center;
+padding: 12px;
+text-align: center;
+}
+
+.modal-cover .cover-title { font-size: 12px; }
+
+.modal h2 {
+font-family: ‘Fraunces’, serif;
+font-size: 22px;
+margin: 0 0 4px;
+}
+
+.modal .modal-author {
+color: var(–ink-soft);
+font-size: 13.5px;
+margin: 0 0 16px;
+}
+
+.modal-tags {
+display: flex;
+gap: 8px;
+flex-wrap: wrap;
+margin-bottom: 18px;
+}
+
+.modal-tags span {
+background: var(–blush);
+color: var(–ink);
+font-size: 11.5px;
+font-weight: 600;
+padding: 5px 12px;
+border-radius: 999px;
+}
+
+.modal-actions {
+display: flex;
+gap: 10px;
+}
+
+.btn {
+font-family: ‘Quicksand’, sans-serif;
+font-weight: 700;
+font-size: 13.5px;
+border: none;
+padding: 12px 20px;
+border-radius: 999px;
+cursor: pointer;
+transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-primary {
+background: linear-gradient(135deg, var(–lavender), var(–pink));
+color: #fff;
+flex: 1;
+}
+
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -10px rgba(212,165,196,0.6); }
+
+.btn-secondary {
+background: var(–blush);
+color: var(–ink);
+}
+
+.btn-secondary:hover { background: var(–blush-deep); }
+
+#file-input { display: none; }
+
+@media (max-width: 480px) {
+header { padding: 40px 5vw 20px; }
+.grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 22px 14px; }
+}
+</style>
+
+</head>
+<body>
+
+<header>
+  <div class="brand-row">
+    <div>
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 34 34" fill="none">
+          <path d="M6 6 C6 4 8 3 10 4 L16 7 L16 28 L10 25 C8 24 6 25 6 27 Z" fill="#B8A9D9"/>
+          <path d="M28 6 C28 4 26 3 24 4 L18 7 L18 28 L24 25 C26 24 28 25 28 27 Z" fill="#D4A5C4"/>
+        </svg>
+        <h1>my <em>shelf</em></h1>
+      </div>
+      <p class="tagline">a little library, all your own</p>
+    </div>
+    <div class="stats">
+      <span><strong id="stat-total">0</strong> books</span>
+      <span><strong id="stat-reading">0</strong> in progress</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="search-wrap">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8B7FA3" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="search" type="text" placeholder="search your shelf..." autocomplete="off">
+    </div>
+    <div class="shelf-tabs" id="shelf-tabs">
+      <button class="shelf-tab active" data-filter="all">all</button>
+      <button class="shelf-tab" data-filter="reading">reading</button>
+      <button class="shelf-tab" data-filter="unread">unread</button>
+      <button class="shelf-tab" data-filter="finished">finished</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="shelf-section">
+    <p class="shelf-label" id="grid-label">your shelf</p>
+    <div class="grid" id="grid"></div>
+  </div>
+</main>
+
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal">
+    <button class="modal-close" id="modal-close">&#10005;</button>
+    <div class="modal-cover" id="modal-cover"></div>
+    <h2 id="modal-title"></h2>
+    <p class="modal-author" id="modal-author"></p>
+    <div class="modal-tags" id="modal-tags"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="modal-open-btn">open book</button>
+      <button class="btn btn-secondary" id="modal-remove-btn">remove</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="file-input" accept=".epub" multiple>
+
+<script>
+  /* ---------------------------------------------------------
+     DATA LAYER
+     For now, books are placeholder entries with generated
+     "covers" (gradient + title) since no real epub files are
+     wired in yet. Swap `sampleBooks` for real parsed epub
+     metadata later (title/author/cover image from the epub
+     package, plus a stored file reference or blob URL).
+  --------------------------------------------------------- */
+
+  const coverPalettes = [
+    ['#F3DFE8', '#E4C9DD'],
+    ['#D9D3EF', '#C3B8E0'],
+    ['#FCE9D8', '#F5D3B0'],
+    ['#DDEAE0', '#BFDDC7'],
+    ['#F6DCE1', '#E9B8C6'],
+    ['#E3E0F5', '#CBC4EA'],
+  ];
+
+  function paletteFor(seed) {
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+    return coverPalettes[Math.abs(hash) % coverPalettes.length];
+  }
+
+  const sampleBooks = [
+    { id: 1, title: "The House in the Cerulean Sea", author: "TJ Klune", status: "reading", progress: 62, tags: ["fantasy", "cozy"] },
+    { id: 2, title: "Erha / 2ha", author: "肉包不吃肉", status: "reading", progress: 34, tags: ["danmei", "xianxia"] },
+    { id: 3, title: "Piranesi", author: "Susanna Clarke", status: "unread", progress: 0, tags: ["fantasy"] },
+    { id: 4, title: "Slow Damage", author: "Mikage Sasaki", status: "finished", progress: 100, tags: ["manga"] },
+    { id: 5, title: "A Psalm for the Wild-Built", author: "Becky Chambers", status: "unread", progress: 0, tags: ["scifi", "cozy"] },
+    { id: 6, title: "Legends & Lattes", author: "Travis Baldree", status: "finished", progress: 100, tags: ["fantasy", "cozy"] },
+  ];
+
+  let books = [...sampleBooks];
+  let activeFilter = 'all';
+  let searchTerm = '';
+
+  const grid = document.getElementById('grid');
+  const gridLabel = document.getElementById('grid-label');
+  const statTotal = document.getElementById('stat-total');
+  const statReading = document.getElementById('stat-reading');
+
+  function renderCover(book) {
+    const [c1, c2] = paletteFor(book.title);
+    return `background: linear-gradient(150deg, ${c1}, ${c2});`;
+  }
+
+  function render() {
+    let list = books.filter(b => {
+      const matchesFilter = activeFilter === 'all' || b.status === activeFilter;
+      const matchesSearch = (b.title + ' ' + b.author).toLowerCase().includes(searchTerm.toLowerCase());
+      return matchesFilter && matchesSearch;
+    });
+
+    statTotal.textContent = books.length;
+    statReading.textContent = books.filter(b => b.status === 'reading').length;
+
+    if (list.length === 0) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">nothing here yet ✿ try another search or shelf</div>`;
+      return;
+    }
+
+    grid.innerHTML = list.map(book => `
+      <div class="book" tabindex="0" data-id="${book.id}">
+        <div class="cover" style="${renderCover(book)}">
+          <span class="cover-title">${book.title}</span>
+        </div>
+        <div class="meta">
+          <p class="title">${book.title}</p>
+          <p class="author">${book.author}</p>
+          ${book.progress > 0 && book.progress < 100 ? `
+            <div class="progress-bar"><span style="width:${book.progress}%"></span></div>
+          ` : ''}
+        </div>
+      </div>
+    `).join('') + `
+      <div class="book add-book" id="add-book-tile" tabindex="0">
+        <div class="cover">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <div class="meta"><p class="title">add a book</p></div>
+      </div>
+    `;
+
+    document.querySelectorAll('.book:not(.add-book)').forEach(el => {
+      el.addEventListener('click', () => openModal(Number(el.dataset.id)));
+      el.addEventListener('keydown', e => { if (e.key === 'Enter') openModal(Number(el.dataset.id)); });
+    });
+
+    document.getElementById('add-book-tile').addEventListener('click', () => {
+      document.getElementById('file-input').click();
+    });
+  }
+
+  /* ---------------------------------------------------------
+     MODAL
+  --------------------------------------------------------- */
+  const backdrop = document.getElementById('modal-backdrop');
+  let currentBookId = null;
+
+  function openModal(id) {
+    const book = books.find(b => b.id === id);
+    if (!book) return;
+    currentBookId = id;
+    document.getElementById('modal-title').textContent = book.title;
+    document.getElementById('modal-author').textContent = book.author;
+    document.getElementById('modal-cover').style.cssText = renderCover(book);
+    document.getElementById('modal-cover').innerHTML = `<span class="cover-title">${book.title}</span>`;
+    document.getElementById('modal-tags').innerHTML = book.tags.map(t => `<span>${t}</span>`).join('');
+    backdrop.classList.add('open');
+  }
+
+  function closeModal() {
+    backdrop.classList.remove('open');
+    currentBookId = null;
+  }
+
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  backdrop.addEventListener('click', e => { if (e.target === backdrop) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  document.getElementById('modal-remove-btn').addEventListener('click', () => {
+    books = books.filter(b => b.id !== currentBookId);
+    closeModal();
+    render();
+  });
+
+  document.getElementById('modal-open-btn').addEventListener('click', () => {
+    // Placeholder: wire this up to an actual epub reader later
+    // (e.g. epub.js) once real files are loaded.
+    alert("Reader view isn't wired up yet — this is where your epub would open!");
+  });
+
+  /* ---------------------------------------------------------
+     SEARCH + FILTER TABS
+  --------------------------------------------------------- */
+  document.getElementById('search').addEventListener('input', e => {
+    searchTerm = e.target.value;
+    render();
+  });
+
+  document.getElementById('shelf-tabs').addEventListener('click', e => {
+    const btn = e.target.closest('.shelf-tab');
+    if (!btn) return;
+    document.querySelectorAll('.shelf-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    gridLabel.textContent = activeFilter === 'all' ? 'your shelf' : activeFilter;
+    render();
+  });
+
+  /* ---------------------------------------------------------
+     FILE INPUT (placeholder — just adds a stub entry for now)
+     Real epub parsing (title/author/cover) can be added later
+     using a library like epub.js, run client-side.
+  --------------------------------------------------------- */
+  document.getElementById('file-input').addEventListener('change', e => {
+    const files = Array.from(e.target.files);
+    files.forEach(file => {
+      const title = file.name.replace(/\.epub$/i, '');
+      books.push({
+        id: Date.now() + Math.random(),
+        title,
+        author: "unknown author",
+        status: "unread",
+        progress: 0,
+        tags: ["new"]
+      });
+    });
+    render();
+  });
+
+  render();
+</script>
+
+</body>
+</html>
