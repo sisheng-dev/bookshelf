@@ -202,18 +202,82 @@ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
 gap: 30px 22px;
 }
 
+/* ––––– Ambient decoration ––––– */
+.decor-layer {
+position: fixed;
+inset: 0;
+pointer-events: none;
+overflow: hidden;
+z-index: 0;
+}
+
+.decor-item {
+position: absolute;
+opacity: 0.55;
+animation: drift 14s ease-in-out infinite;
+}
+
+@keyframes drift {
+0%   { transform: translateY(0) rotate(0deg); }
+50%  { transform: translateY(-22px) rotate(8deg); }
+100% { transform: translateY(0) rotate(0deg); }
+}
+
+@keyframes twinkle {
+0%, 100% { opacity: 0.25; transform: scale(0.85); }
+50% { opacity: 0.8; transform: scale(1.1); }
+}
+
+.sparkle {
+animation: twinkle 3.4s ease-in-out infinite;
+}
+
+header, main, .modal-backdrop { position: relative; z-index: 1; }
+
+@keyframes wiggle {
+0%, 100% { transform: rotate(-3deg); }
+50% { transform: rotate(3deg); }
+}
+
+.brand-mark {
+animation: wiggle 4s ease-in-out infinite;
+transform-origin: center;
+}
+
+@keyframes float-in {
+from { opacity: 0; transform: translateY(16px) scale(0.94); }
+to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes gentle-sway {
+0%, 100% { transform: rotate(-0.6deg); }
+50% { transform: rotate(0.6deg); }
+}
+
 .book {
 cursor: pointer;
 display: flex;
 flex-direction: column;
 gap: 10px;
 position: relative;
+animation: float-in 0.5s cubic-bezier(.2,.8,.2,1) backwards;
+}
+
+.book .cover-sway {
+animation: gentle-sway 5s ease-in-out infinite;
+transform-origin: bottom center;
+}
+
+.book:hover .cover-sway, .book:focus-visible .cover-sway {
+animation-play-state: paused;
 }
 
 .book:focus-visible .cover {
 outline: 3px solid var(–pink);
 outline-offset: 3px;
 }
+
+.cover-sway { position: relative; z-index: 1; }
 
 .cover {
 aspect-ratio: 2 / 3;
@@ -225,7 +289,7 @@ justify-content: center;
 text-align: center;
 padding: 18px;
 position: relative;
-transition: transform 0.28s cubic-bezier(.2,.8,.2,1), box-shadow 0.28s;
+transition: transform 0.38s cubic-bezier(.34, 1.56, .64, 1), box-shadow 0.3s;
 overflow: hidden;
 }
 
@@ -263,8 +327,26 @@ color: rgba(0,0,0,0.72);
 }
 
 .book:hover .cover, .book:focus-visible .cover {
-transform: translateY(-6px) rotate(-1deg);
+transform: translateY(-10px);
 box-shadow: var(–card-shadow-hover);
+}
+
+.ground-shadow {
+position: absolute;
+left: 50%;
+bottom: -6px;
+transform: translateX(-50%);
+width: 70%;
+height: 10px;
+background: radial-gradient(ellipse at center, rgba(139,127,163,0.28) 0%, transparent 72%);
+border-radius: 50%;
+transition: transform 0.38s cubic-bezier(.34, 1.56, .64, 1), opacity 0.3s;
+z-index: -1;
+}
+
+.book:hover .ground-shadow, .book:focus-visible .ground-shadow {
+transform: translateX(-50%) scaleX(1.15);
+opacity: 0.6;
 }
 
 .progress-ring {
@@ -316,6 +398,23 @@ font-style: italic;
 font-size: 16px;
 }
 
+.empty-state .empty-icon {
+font-size: 32px;
+display: block;
+margin-bottom: 10px;
+animation: float-in 0.5s ease, drift 3s ease-in-out infinite 0.5s;
+}
+
+@keyframes heart-beat {
+0%, 100% { transform: scale(1); }
+50% { transform: scale(1.25); }
+}
+
+.stats .heart {
+display: inline-block;
+animation: heart-beat 1.6s ease-in-out infinite;
+}
+
 /* ––––– Upload tile ––––– */
 .add-book .cover {
 background: #fff;
@@ -324,13 +423,20 @@ box-shadow: none;
 color: var(–ink-soft);
 flex-direction: column;
 gap: 8px;
+transition: transform 0.38s cubic-bezier(.34, 1.56, .64, 1), border-color 0.2s, color 0.2s;
 }
 
 .add-book .cover::before, .add-book .cover::after { display: none; }
+.add-book .cover svg { transition: transform 0.3s cubic-bezier(.34, 1.56, .64, 1); }
+
 .add-book:hover .cover {
 border-color: var(–pink);
 color: var(–pink);
-transform: translateY(-4px);
+transform: translateY(-10px);
+}
+
+.add-book:hover .cover svg {
+transform: rotate(90deg) scale(1.15);
 }
 
 .add-book .meta .title { color: var(–ink-soft); font-weight: 600; }
@@ -358,14 +464,14 @@ pointer-events: auto;
 
 .modal {
 background: #fff;
-border-radius: 22px;
+border-radius: 26px;
 max-width: 440px;
 width: 100%;
 padding: 34px 30px 28px;
 position: relative;
 box-shadow: 0 30px 60px -20px rgba(69, 54, 69, 0.35);
-transform: translateY(14px) scale(0.98);
-transition: transform 0.25s ease;
+transform: translateY(18px) scale(0.92);
+transition: transform 0.4s cubic-bezier(.34, 1.56, .64, 1);
 }
 
 .modal-backdrop.open .modal {
@@ -439,6 +545,81 @@ display: flex;
 gap: 10px;
 }
 
+.modal-edit-toggle {
+position: absolute;
+top: 18px;
+right: 60px;
+background: var(–blush);
+border: none;
+width: 30px;
+height: 30px;
+border-radius: 50%;
+cursor: pointer;
+color: var(–ink);
+font-size: 13px;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.modal-edit-toggle:hover {
+background: var(–pink);
+color: #fff;
+transform: rotate(-8deg) scale(1.06);
+}
+
+.field {
+margin-bottom: 14px;
+}
+
+.field label {
+display: block;
+font-size: 11.5px;
+font-weight: 700;
+color: var(–ink-soft);
+text-transform: uppercase;
+letter-spacing: 0.05em;
+margin-bottom: 5px;
+}
+
+.field input {
+width: 100%;
+font-family: ‘Quicksand’, sans-serif;
+font-size: 14px;
+font-weight: 600;
+color: var(–ink);
+border: 1.5px solid var(–blush-deep);
+border-radius: 12px;
+padding: 9px 12px;
+outline: none;
+background: #fffafc;
+transition: border-color 0.18s, box-shadow 0.18s;
+}
+
+.field input:focus {
+border-color: var(–pink);
+box-shadow: 0 0 0 4px rgba(212, 165, 196, 0.16);
+}
+
+.field-title input {
+font-family: ‘Fraunces’, serif;
+font-size: 18px;
+}
+
+.field-status select {
+width: 100%;
+font-family: ‘Quicksand’, sans-serif;
+font-size: 13.5px;
+font-weight: 600;
+color: var(–ink);
+border: 1.5px solid var(–blush-deep);
+border-radius: 12px;
+padding: 9px 12px;
+background: #fffafc;
+outline: none;
+}
+
 .btn {
 font-family: ‘Quicksand’, sans-serif;
 font-weight: 700;
@@ -467,6 +648,54 @@ color: var(–ink);
 
 #file-input { display: none; }
 
+/* ––––– Confetti burst ––––– */
+.confetti-piece {
+position: fixed;
+top: 50%;
+left: 50%;
+width: 8px;
+height: 8px;
+border-radius: 50%;
+pointer-events: none;
+z-index: 200;
+opacity: 1;
+}
+
+@keyframes confetti-pop {
+0% {
+transform: translate(-50%, -50%) scale(0.4) rotate(0deg);
+opacity: 1;
+}
+70% { opacity: 1; }
+100% {
+transform: translate(var(–tx), var(–ty)) scale(1) rotate(var(–rot));
+opacity: 0;
+}
+}
+
+/* ––––– New book badge ––––– */
+.new-badge {
+position: absolute;
+top: -8px;
+right: -8px;
+background: linear-gradient(135deg, var(–lavender), var(–pink));
+color: #fff;
+font-family: ‘Quicksand’, sans-serif;
+font-weight: 700;
+font-size: 9.5px;
+letter-spacing: 0.04em;
+padding: 4px 9px;
+border-radius: 999px;
+box-shadow: 0 4px 10px -3px rgba(212, 165, 196, 0.6);
+z-index: 2;
+animation: badge-pop 0.4s cubic-bezier(.34, 1.56, .64, 1) backwards;
+}
+
+@keyframes badge-pop {
+from { transform: scale(0) rotate(-15deg); opacity: 0; }
+to { transform: scale(1) rotate(-8deg); opacity: 1; }
+}
+
 @media (max-width: 480px) {
 header { padding: 40px 5vw 20px; }
 .grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 22px 14px; }
@@ -475,6 +704,15 @@ header { padding: 40px 5vw 20px; }
 
 </head>
 <body>
+
+<div class="decor-layer" aria-hidden="true">
+  <svg class="decor-item" style="left:5%; top:12%; animation-delay:0s;" width="22" height="22" viewBox="0 0 24 24"><path fill="#D4A5C4" d="M12 2C9 8 3 9 3 14a9 9 0 0018 0c0-5-6-6-9-12z"/></svg>
+  <svg class="decor-item" style="right:7%; top:20%; animation-delay:2s;" width="16" height="16" viewBox="0 0 24 24"><path fill="#B8A9D9" d="M12 2C9 8 3 9 3 14a9 9 0 0018 0c0-5-6-6-9-12z"/></svg>
+  <svg class="decor-item sparkle" style="left:16%; top:38%; animation-delay:0.6s;" width="14" height="14" viewBox="0 0 24 24"><path fill="#D4A5C4" d="M12 0l2.2 8.3L22 12l-7.8 3.7L12 24l-2.2-8.3L2 12l7.8-3.7z"/></svg>
+  <svg class="decor-item sparkle" style="right:14%; top:55%; animation-delay:1.4s;" width="18" height="18" viewBox="0 0 24 24"><path fill="#B8A9D9" d="M12 0l2.2 8.3L22 12l-7.8 3.7L12 24l-2.2-8.3L2 12l7.8-3.7z"/></svg>
+  <svg class="decor-item" style="left:45%; top:8%; animation-delay:3s;" width="12" height="12" viewBox="0 0 24 24"><path fill="#F0C6DA" d="M12 2C9 8 3 9 3 14a9 9 0 0018 0c0-5-6-6-9-12z"/></svg>
+  <svg class="decor-item sparkle" style="right:35%; top:5%; animation-delay:2.2s;" width="11" height="11" viewBox="0 0 24 24"><path fill="#EACBDB" d="M12 0l2.2 8.3L22 12l-7.8 3.7L12 24l-2.2-8.3L2 12l7.8-3.7z"/></svg>
+</div>
 
 <header>
   <div class="brand-row">
@@ -490,7 +728,7 @@ header { padding: 40px 5vw 20px; }
     </div>
     <div class="stats">
       <span><strong id="stat-total">0</strong> books</span>
-      <span><strong id="stat-reading">0</strong> in progress</span>
+      <span><span class="heart">💗</span> <strong id="stat-reading">0</strong> in progress</span>
     </div>
   </div>
 
@@ -517,15 +755,49 @@ header { padding: 40px 5vw 20px; }
 
 <div class="modal-backdrop" id="modal-backdrop">
   <div class="modal">
+    <button class="modal-edit-toggle" id="modal-edit-toggle" title="edit details">&#9998;</button>
     <button class="modal-close" id="modal-close">&#10005;</button>
     <div class="modal-cover" id="modal-cover"></div>
-    <h2 id="modal-title"></h2>
-    <p class="modal-author" id="modal-author"></p>
-    <div class="modal-tags" id="modal-tags"></div>
-    <div class="modal-actions">
-      <button class="btn btn-primary" id="modal-open-btn">open book</button>
-      <button class="btn btn-secondary" id="modal-remove-btn">remove</button>
-    </div>
+
+```
+<div id="view-mode">
+  <h2 id="modal-title"></h2>
+  <p class="modal-author" id="modal-author"></p>
+  <div class="modal-tags" id="modal-tags"></div>
+  <div class="modal-actions">
+    <button class="btn btn-primary" id="modal-open-btn">open book</button>
+    <button class="btn btn-secondary" id="modal-remove-btn">remove</button>
+  </div>
+</div>
+
+<div id="edit-mode" style="display:none;">
+  <div class="field field-title">
+    <label for="edit-title">title</label>
+    <input id="edit-title" type="text">
+  </div>
+  <div class="field">
+    <label for="edit-author">author</label>
+    <input id="edit-author" type="text">
+  </div>
+  <div class="field">
+    <label for="edit-tags">tags <span style="text-transform:none;font-weight:500;">(comma separated)</span></label>
+    <input id="edit-tags" type="text" placeholder="fantasy, cozy, favorites">
+  </div>
+  <div class="field field-status">
+    <label for="edit-status">shelf</label>
+    <select id="edit-status">
+      <option value="unread">unread</option>
+      <option value="reading">reading</option>
+      <option value="finished">finished</option>
+    </select>
+  </div>
+  <div class="modal-actions">
+    <button class="btn btn-primary" id="edit-save-btn">save changes</button>
+    <button class="btn btn-secondary" id="edit-cancel-btn">cancel</button>
+  </div>
+</div>
+```
+
   </div>
 </div>
 
@@ -556,13 +828,59 @@ header { padding: 40px 5vw 20px; }
     return coverPalettes[Math.abs(hash) % coverPalettes.length];
   }
 
+  const confettiColors = ['#D4A5C4', '#B8A9D9', '#F0C6DA', '#EACBDB', '#C3B8E0', '#FCE9D8'];
+
+  function burstConfetti(originEl) {
+    const rect = originEl ? originEl.getBoundingClientRect() : null;
+    burstConfettiAtRect(rect);
+  }
+
+  function burstConfettiAtRect(rect) {
+    const originX = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
+    const originY = rect ? rect.top + rect.height / 2 : window.innerHeight / 2;
+    const count = 22;
+
+    for (let i = 0; i < count; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      const angle = (Math.PI * 2 * i) / count + Math.random() * 0.4;
+      const distance = 60 + Math.random() * 90;
+      const tx = Math.cos(angle) * distance;
+      const ty = Math.sin(angle) * distance - 20; // slight upward bias
+      const rot = (Math.random() - 0.5) * 540;
+      const color = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+      const isHeart = Math.random() < 0.25;
+
+      piece.style.left = originX + 'px';
+      piece.style.top = originY + 'px';
+      piece.style.setProperty('--tx', tx + 'px');
+      piece.style.setProperty('--ty', ty + 'px');
+      piece.style.setProperty('--rot', rot + 'deg');
+      piece.style.animation = `confetti-pop ${0.6 + Math.random() * 0.4}s ease-out forwards`;
+
+      if (isHeart) {
+        piece.style.background = 'transparent';
+        piece.style.fontSize = '12px';
+        piece.style.width = 'auto';
+        piece.style.height = 'auto';
+        piece.textContent = '💕';
+      } else {
+        piece.style.background = color;
+        if (Math.random() < 0.4) piece.style.borderRadius = '3px'; // mix circles + little squares
+      }
+
+      document.body.appendChild(piece);
+      setTimeout(() => piece.remove(), 1100);
+    }
+  }
+
   const sampleBooks = [
-    { id: 1, title: "Heaven Official's Blessing", author: "MXTX", status: "reading", progress: 62, tags: ["fantasy", "cozy"] },
-    { id: 2, title: "The Husky and His White Cat Shizun", author: "Meatbun", status: "reading", progress: 34, tags: ["danmei", "xianxia"] },
-    { id: 3, title: "Little Mushroom", author: "Susanna Clarke", status: "unread", progress: 0, tags: ["fantasy"] },
-    { id: 4, title: "Scum Villian's Self Saving System", author: "MXTX", status: "finished", progress: 100, tags: ["manga"] },
-    { id: 5, title: "Case File Compendium", author: "MXTX", status: "unread", progress: 0, tags: ["scifi", "cozy"] },
-    { id: 6, title: "Lost in the Cloud", author: "Pasim", status: "finished", progress: 100, tags: ["fantasy", "cozy"] },
+    { id: 1, title: "The House in the Cerulean Sea", author: "TJ Klune", status: "reading", progress: 62, tags: ["fantasy", "cozy"] },
+    { id: 2, title: "Erha / 2ha", author: "肉包不吃肉", status: "reading", progress: 34, tags: ["danmei", "xianxia"] },
+    { id: 3, title: "Piranesi", author: "Susanna Clarke", status: "unread", progress: 0, tags: ["fantasy"] },
+    { id: 4, title: "Slow Damage", author: "Mikage Sasaki", status: "finished", progress: 100, tags: ["manga"] },
+    { id: 5, title: "A Psalm for the Wild-Built", author: "Becky Chambers", status: "unread", progress: 0, tags: ["scifi", "cozy"] },
+    { id: 6, title: "Legends & Lattes", author: "Travis Baldree", status: "finished", progress: 100, tags: ["fantasy", "cozy"] },
   ];
 
   let books = [...sampleBooks];
@@ -590,14 +908,18 @@ header { padding: 40px 5vw 20px; }
     statReading.textContent = books.filter(b => b.status === 'reading').length;
 
     if (list.length === 0) {
-      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">nothing here yet ✿ try another search or shelf</div>`;
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><span class="empty-icon">🌙📖</span>this corner of the shelf is empty<br>try another search, or add something new!</div>`;
       return;
     }
 
-    grid.innerHTML = list.map(book => `
-      <div class="book" tabindex="0" data-id="${book.id}">
-        <div class="cover" style="${renderCover(book)}">
-          <span class="cover-title">${book.title}</span>
+    grid.innerHTML = list.map((book, i) => `
+      <div class="book" tabindex="0" data-id="${book.id}" style="animation-delay:${i * 0.05}s">
+        <div class="cover-sway" style="animation-delay:${(i % 5) * 0.4}s">
+          <div class="cover" style="${renderCover(book)}">
+            ${book.isNew ? `<span class="new-badge">new!</span>` : ''}
+            <span class="cover-title">${book.title}</span>
+            <div class="ground-shadow"></div>
+          </div>
         </div>
         <div class="meta">
           <p class="title">${book.title}</p>
@@ -632,26 +954,77 @@ header { padding: 40px 5vw 20px; }
   const backdrop = document.getElementById('modal-backdrop');
   let currentBookId = null;
 
-  function openModal(id) {
-    const book = books.find(b => b.id === id);
-    if (!book) return;
-    currentBookId = id;
+  function fillViewMode(book) {
     document.getElementById('modal-title').textContent = book.title;
     document.getElementById('modal-author').textContent = book.author;
     document.getElementById('modal-cover').style.cssText = renderCover(book);
     document.getElementById('modal-cover').innerHTML = `<span class="cover-title">${book.title}</span>`;
     document.getElementById('modal-tags').innerHTML = book.tags.map(t => `<span>${t}</span>`).join('');
+  }
+
+  function fillEditMode(book) {
+    document.getElementById('edit-title').value = book.title;
+    document.getElementById('edit-author').value = book.author;
+    document.getElementById('edit-tags').value = book.tags.join(', ');
+    document.getElementById('edit-status').value = book.status;
+  }
+
+  function setEditing(isEditing) {
+    document.getElementById('view-mode').style.display = isEditing ? 'none' : 'block';
+    document.getElementById('edit-mode').style.display = isEditing ? 'block' : 'none';
+    document.getElementById('modal-edit-toggle').style.display = isEditing ? 'none' : 'flex';
+  }
+
+  function openModal(id) {
+    const book = books.find(b => b.id === id);
+    if (!book) return;
+    currentBookId = id;
+    fillViewMode(book);
+    fillEditMode(book);
+    setEditing(false);
     backdrop.classList.add('open');
+    if (book.isNew) {
+      book.isNew = false;
+      render(); // re-render in background so badge disappears once they've seen it
+    }
   }
 
   function closeModal() {
     backdrop.classList.remove('open');
+    setEditing(false);
     currentBookId = null;
   }
 
   document.getElementById('modal-close').addEventListener('click', closeModal);
   backdrop.addEventListener('click', e => { if (e.target === backdrop) closeModal(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  document.getElementById('modal-edit-toggle').addEventListener('click', () => setEditing(true));
+  document.getElementById('edit-cancel-btn').addEventListener('click', () => {
+    const book = books.find(b => b.id === currentBookId);
+    fillEditMode(book); // reset any unsaved changes
+    setEditing(false);
+  });
+
+  document.getElementById('edit-save-btn').addEventListener('click', (e) => {
+    const book = books.find(b => b.id === currentBookId);
+    if (!book) return;
+    const newTitle = document.getElementById('edit-title').value.trim();
+    book.title = newTitle || book.title;
+    book.author = document.getElementById('edit-author').value.trim() || 'unknown author';
+    book.tags = document.getElementById('edit-tags').value
+      .split(',').map(t => t.trim()).filter(Boolean);
+    book.status = document.getElementById('edit-status').value;
+    if (book.status === 'finished') book.progress = 100;
+    if (book.status === 'unread') book.progress = 0;
+    if (book.status === 'reading' && book.progress === 0) book.progress = 5;
+    book.isNew = false;
+
+    fillViewMode(book);
+    setEditing(false);
+    burstConfetti(e.currentTarget);
+    render();
+  });
 
   document.getElementById('modal-remove-btn').addEventListener('click', () => {
     books = books.filter(b => b.id !== currentBookId);
@@ -690,6 +1063,8 @@ header { padding: 40px 5vw 20px; }
   --------------------------------------------------------- */
   document.getElementById('file-input').addEventListener('change', e => {
     const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
     files.forEach(file => {
       const title = file.name.replace(/\.epub$/i, '');
       books.push({
@@ -698,10 +1073,16 @@ header { padding: 40px 5vw 20px; }
         author: "unknown author",
         status: "unread",
         progress: 0,
-        tags: ["new"]
+        tags: ["new"],
+        isNew: true
       });
     });
+
+    const addTile = document.getElementById('add-book-tile');
+    const rect = addTile ? addTile.getBoundingClientRect() : null;
     render();
+    burstConfettiAtRect(rect);
+    e.target.value = ''; // allow re-selecting the same file later
   });
 
   render();
