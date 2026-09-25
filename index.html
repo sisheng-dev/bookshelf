@@ -12,9 +12,9 @@
       with prev/next buttons and arrow-key page turning
     - everything happens client-side — no backend/server needed,
       nothing is uploaded anywhere
-    - note: uploaded books only last for the current browser
-      session (no storage wired up yet), so a page refresh will
-      clear them — that's expected for now
+    - books and uploaded EPUB files are saved locally in this browser
+      with IndexedDB, so they survive page refreshes; clearing site
+      data will remove them
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -1032,7 +1032,8 @@
      DATA LAYER
      Books uploaded via the "add a book" tile are parsed with
      epub.js, so title/author/cover come from the real file.
-     No reading-progress tracking — this is a flat archive.
+    No reading-progress tracking — this is a flat archive. Shelf
+    state and uploaded EPUB blobs are persisted in IndexedDB.
      Books have: title, author, tags, isFavorite, and a
      fileUrl (blob URL) used to open the reader.
   --------------------------------------------------------- */
@@ -1118,9 +1119,71 @@
     { id: 8, title: "The Atlas Seven", author: "Olivie Blake", tags: ["fantasy", "dark academia"], isFavorite: false },
   ];
 
-  let books = [...sampleBooks];
+  const booksDbName = 'my-shelf-library';
+  const booksStoreName = 'state';
+  let books = [];
   let activeFilter = 'all';
   let searchTerm = '';
+
+  function openBooksDb() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(booksDbName, 1);
+      request.onupgradeneeded = () => request.result.createObjectStore(booksStoreName);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async function saveBooks() {
+    try {
+      const db = await openBooksDb();
+      await new Promise((resolve, reject) => {
+        const transaction = db.transaction(booksStoreName, 'readwrite');
+        transaction.objectStore(booksStoreName).put(books, 'library');
+        transaction.oncomplete = resolve;
+        transaction.onerror = () => reject(transaction.error);
+      });
+      db.close();
+    } catch (err) {
+      console.warn('Could not save your shelf:', err);
+    }
+  }
+
+  async function loadBooks() {
+    try {
+      const db = await openBooksDb();
+      const storedBooks = await new Promise((resolve, reject) => {
+        const request = db.transaction(booksStoreName).objectStore(booksStoreName).get('library');
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      db.close();
+
+      if (!storedBooks) {
+        books = [...sampleBooks];
+        await saveBooks();
+        return;
+      }
+
+      books = storedBooks;
+      await Promise.all(books.map(async book => {
+        if (!book.fileBlob) return;
+        book.fileUrl = URL.createObjectURL(book.fileBlob);
+        book.coverUrl = null;
+        try {
+          const epub = ePub(book.fileUrl);
+          const cover = await epub.coverUrl();
+          if (cover) book.coverUrl = cover;
+          epub.destroy();
+        } catch (err) {
+          console.warn('Could not restore cover:', book.title, err);
+        }
+      }));
+    } catch (err) {
+      console.warn('Could not load your shelf:', err);
+      books = [...sampleBooks];
+    }
+  }
 
   const grid = document.getElementById('grid');
   const gridLabel = document.getElementById('grid-label');
@@ -1214,6 +1277,7 @@
         const book = books.find(b => b.id === Number(btn.dataset.favId));
         if (!book) return;
         book.isFavorite = !book.isFavorite;
+        saveBooks();
         render();
       });
     });
@@ -1304,6 +1368,7 @@
     book.isFavorite = !book.isFavorite;
     fillViewMode(book);
     fillEditMode(book);
+    saveBooks();
     render();
   });
 
@@ -1327,12 +1392,14 @@
     fillViewMode(book);
     setEditing(false);
     burstConfetti(e.currentTarget);
+    saveBooks();
     render();
   });
 
   document.getElementById('modal-remove-btn').addEventListener('click', () => {
     books = books.filter(b => b.id !== currentBookId);
     closeModal();
+    saveBooks();
     render();
   });
 
@@ -1405,9 +1472,9 @@
 
   /* ---------------------------------------------------------
      THEME TOGGLE
-     Defaults to the visitor's system preference (light/dark),
-     and can be flipped manually with the header switch. Doesn't
-     persist between visits — that would need real storage.
+    Defaults to the visitor's system preference (light/dark),
+    and can be flipped manually with the header switch. The
+    manual choice is persisted locally.
   --------------------------------------------------------- */
   const themeToggle = document.getElementById('theme-toggle');
   const themeKnob = themeToggle.querySelector('.knob');
@@ -1418,11 +1485,13 @@
   }
 
   const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  applyTheme(prefersDark);
+  const savedTheme = localStorage.getItem('my-shelf-theme');
+  applyTheme(savedTheme ? savedTheme === 'dark' : prefersDark);
 
   themeToggle.addEventListener('click', () => {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     applyTheme(!isDark);
+    localStorage.setItem('my-shelf-theme', isDark ? 'light' : 'dark');
     burstConfetti(themeToggle);
   });
 
@@ -1445,11 +1514,6 @@
   });
 
   /* ---------------------------------------------------------
-     FILE INPUT (placeholder — adds a stub entry for now)
-     Real epub parsing (title/author/cover) can be added later
-     using a library like epub.js, run client-side.
-  --------------------------------------------------------- */
-  /* ---------------------------------------------------------
      FILE INPUT — parses real epub files with epub.js:
      pulls title, author, and embedded cover image, and keeps
      a blob URL of the file so the reader can open it later.
@@ -1468,6 +1532,7 @@
       isFavorite: false,
       isNew: true,
       fileUrl,
+      fileBlob: file,
       coverUrl: null
     };
 
@@ -1498,12 +1563,13 @@
     const newEntries = await Promise.all(files.map(parseEpubFile));
     books.push(...newEntries);
 
+    saveBooks();
     render();
     burstConfettiAtRect(rect);
     e.target.value = '';
   });
 
-  render();
+  loadBooks().then(render);
 </script>
 
 </body>
